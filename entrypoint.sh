@@ -1,14 +1,65 @@
 #!/bin/sh
 
+# Linux make this executable via: chmod +x entrypoint.sh
+
 echo "run_id: $RUN_ID"
-npm test
 
-npm run report:publish
-publish_exit_code=$?
+# Pick up values from environment variables provided at container runtime.
+# EXPECTED ENV VARS:
+# - TEST_INPUT: optional test suite filter (e.g. "API" or "UI")
+# - ENVIRONMENT: target environment (e.g. "docker", "dev", "test")
 
-if [ $publish_exit_code -ne 0 ]; then
-  echo "failed to publish test results"
-  exit $publish_exit_code
+echo "------------------------------------------------------------"
+echo "[journey-tests] Environment variables in use:"
+echo "------------------------------------------------------------"
+
+echo "ENVIRONMENT:              ${ENVIRONMENT:-<not set>}"
+echo "PROFILE:                  ${PROFILE:-<not set>}"
+echo "CI:                       ${CI:-<not set>}"
+echo ""
+
+echo "IDENTITY_SERVICE_FRONTEND_BASE_URL:         ${IDENTITY_SERVICE_FRONTEND_BASE_URL:-<not set>}"
+echo "IDENTITY_SERVICE_BACKEND_BASE_URL:          ${IDENTITY_SERVICE_BACKEND_BASE_URL:-<not set>}"
+echo "IDENTITY_SERVICE_BACKEND_EXTERNAL_BASE_URL: ${IDENTITY_SERVICE_BACKEND_EXTERNAL_BASE_URL:-<not set>}"
+echo ""
+
+echo "GITHUB_ACTIONS:           ${GITHUB_ACTIONS:-<not set>}"
+echo "RUN_ID:                   ${RUN_ID:-<not set>}"
+echo ""
+
+echo "Node version:             $(node -v)"
+echo "NPM version:              $(npm -v)"
+echo "Working directory:        $(pwd)"
+echo "------------------------------------------------------------"
+
+TEST_INPUT="${PROFILE}"
+ENVIRONMENT="${ENVIRONMENT}"
+
+FILTER=""
+
+if [ -n "$TEST_INPUT" ]; then
+  FILTER="$TEST_INPUT"
+fi
+
+if [ -z "$FILTER" ]; then
+  echo "No filters provided. Running all tests for environment: $ENVIRONMENT"
+  CDP=true ENVIRONMENT="$ENVIRONMENT" npx playwright test --config=playwright.config.ts
+else
+  echo "Running filtered tests with grep: $FILTER"
+  CDP=true ENVIRONMENT="$ENVIRONMENT" npx playwright test --config=playwright.config.ts --grep="$FILTER"
+fi
+
+# Skip publishing when running in GitHub Actions
+if [ "$GITHUB_ACTIONS" = "true" ]; then
+  echo "Skipping test result publishing in CI"
+else
+  npm run report:publish
+  publish_exit_code=$?
+
+  if [ $publish_exit_code -ne 0 ]; then
+    echo "failed to publish test results"
+    exit $publish_exit_code
+  fi
 fi
 
 # At the end of the test run, if the suite has failed we write a file called 'FAILED'
