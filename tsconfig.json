@@ -24,9 +24,6 @@
     "build:tests": "tsc && npx bddgen",
     "test": "npm run build:tests && npx playwright test --config=playwright.config.ts --test-dir=dist/tests"
   },
-  "include": [
-    "playwright.config.ts",
-    "tests/**/*.ts"
-  ],
+  "include": ["playwright.config.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

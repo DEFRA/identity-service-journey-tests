@@ -127,7 +127,7 @@ export default defineConfig({
           ignoreHTTPSErrors: true,
           url: 'https://localhost:3000/health',
           reuseExistingServer: !process.env.CI,
-          timeout: serverTimeout,
+          timeout: serverTimeout
         },
         {
           name: 'backend-server',
@@ -135,7 +135,7 @@ export default defineConfig({
           gracefulShutdown: { signal: 'SIGTERM', timeout: serverTimeout },
           url: 'http://127.0.0.1:3001/health',
           reuseExistingServer: !process.env.CI,
-          timeout: serverTimeout,
+          timeout: serverTimeout
         }
       ]
     : []

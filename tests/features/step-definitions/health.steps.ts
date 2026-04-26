@@ -1,4 +1,4 @@
-import { test, expect, request } from '@playwright/test'
+import { expect, request } from '@playwright/test'
 import { createBdd } from 'playwright-bdd'
 import { HealthResponse } from '../../types/responses/healthResponse.type'
 import { StatusCodes } from 'http-status-codes'
