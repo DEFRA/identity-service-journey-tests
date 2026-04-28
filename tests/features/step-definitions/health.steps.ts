@@ -4,9 +4,10 @@ import { HealthResponse } from '../../types/responses/healthResponse.type'
 import { StatusCodes } from 'http-status-codes'
 import { EndPoints } from '../../utils/enums'
 import { IdentityServiceHelperClient } from '../support/api/identity.service.helper.client'
+import { IdentityServiceHandlerClient } from '../support/api/identity.service.handler.client'
 
 const { Given, When, Then } = createBdd()
-let identityServiceHelperClient: IdentityServiceHelperClient
+let client: IdentityServiceHelperClient | IdentityServiceHandlerClient
 let response: HealthResponse
 
 Given('the identity service helper is running', async function () {
@@ -16,16 +17,26 @@ Given('the identity service helper is running', async function () {
         ? process.env.apiURLExt
         : process.env.apiURL
   })
-  identityServiceHelperClient = new IdentityServiceHelperClient(apiContext)
+  client = new IdentityServiceHelperClient(apiContext)
+})
+
+Given('the identity service handler is running', async function () {
+  const apiContext = await request.newContext({
+    baseURL: process.env.uiURL
+  })
+  client = new IdentityServiceHandlerClient(apiContext)
 })
 
 When('I check the health endpoint', async function () {
-  response = await identityServiceHelperClient.get<HealthResponse>(
-    EndPoints.Health,
-    StatusCodes.OK
-  )
+  response = await client.get<HealthResponse>(EndPoints.Health, StatusCodes.OK)
 })
 
 Then('I should receive a healthy response', async function () {
-  expect(response).toHaveProperty('status', 'ok')
+  if (client instanceof IdentityServiceHelperClient) {
+    expect(response).toHaveProperty('status', 'ok')
+  } else if (client instanceof IdentityServiceHandlerClient) {
+    expect(response).toHaveProperty('message', 'success')
+  } else {
+    throw new Error('Unknown client type')
+  }
 })
