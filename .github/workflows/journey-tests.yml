@@ -1,15 +1,58 @@
 name: Run Journey Tests on GitHub
 
 permissions:
+  contents: read
   checks: write
   pull-requests: write
 
 on:
   workflow_dispatch:
+    inputs:
+      test:
+        description: 'Choose test suite'
+        type: choice
+        required: false
+        default: ''
+        options:
+          - ''
+          - 'api'
+          - 'ui'
+      tag:
+        description: 'Choose test group'
+        type: choice
+        required: false
+        default: ''
+        options:
+          - ''
+          - 'smoke'
+          - 'e2e'
   workflow_call:
+    inputs:
+      test:
+        required: false
+        type: string
+        default: ''
+      tag:
+        required: false
+        type: string
+        default: ''
+      branch-set:
+        required: false
+        type: string
+        default: main
+      slack-webhook-url:
+        required: false
+        type: string
 jobs:
-  build:
+  journey-tests:
     name: Run Journey Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+
     steps:
-      - uses: DEFRA/cdp-node-journey-test-suite-template/run-journey-tests@main
+      - uses: DEFRA/identity-service-journey-tests/run-journey-tests@main
+        with:
+          branch-set: ${{ inputs.branch-set }}
+          slack-webhook-url: ${{ inputs.slack-webhook-url }}
+          test: ${{ inputs.test }}
+          tag: ${{ inputs.tag }}

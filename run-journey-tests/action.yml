@@ -1,56 +1,173 @@
 name: Run Journey Tests on GitHub
+description: "Run journey tests for identity-service projects"
 
 inputs:
-  example-node-backend:
+  branch-set:
+    description: "Which branch set to test (defaults to main)"
     required: false
     type: string
-  example-node-frontend:
-    required: false
-    type: string
+    default: main
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v4
+    - name: Checkout identity-service-helper
+      uses: actions/checkout@v4
       with:
-        repository: DEFRA/cdp-node-journey-test-suite-template
+        repository: DEFRA/identity-service-helper
+        ref: ${{ inputs.branch-set }}
+        path: identity-service-helper
 
-    - name: Docker Login
-      uses: DEFRA/cdp-build-action/docker-login@main
-
-    - uses: actions/setup-node@v4
+    - name: Checkout identity-service-handler
+      uses: actions/checkout@v4
       with:
-        node-version: 20
-        cache: npm
-    - name: Setup the tests
-      run: npm i
-      shell: bash
-    - name: Start docker compose
+        repository: DEFRA/identity-service-handler
+        ref: ${{ inputs.branch-set }}
+        path: identity-service-handler
+
+    - name: Checkout identity-service-journey-tests
+      uses: actions/checkout@v4
+      with:
+        repository: DEFRA/identity-service-journey-tests
+        ref: ${{ inputs.branch-set }}
+        path: identity-service-journey-tests
+
+    - name: Fix permissions for platform scripts
       shell: bash
       run: |
-          CDP_EXAMPLE_NODE_FRONTEND=${{inputs.example-node-frontend}} \
-          CDP_EXAMPLE_NODE_BACKEND=${{inputs.example-node-backend}} \
-          docker compose up --wait-timeout 300 -d --quiet-pull
-    - name: Run the tests
+        chmod -R +x identity-service-helper/**/*.sh || true
+        chmod -R +x identity-service-handler/**/*.sh || true
+        chmod -R +x identity-service-journey-tests/**/*.sh || true
+
+    # Create cads-tools network early (other projects reference as external)
+    - name: Ensure identity-service network exists
       shell: bash
       run: |
-        npm run test:github
-        npm run report
-    - name: debug
+        if ! docker network inspect identity-service >/dev/null 2>&1; then
+          docker network create \
+            --label com.docker.compose.network=identity-service \
+            identity-service
+        fi
+
+    # Start platform (backend + UI)
+    - name: Start platform
+      working-directory: identity-service-journey-tests/bin
+      shell: bash
+      run: |
+        chmod +x platform.sh
+        ./platform.sh backend up && ./platform.sh frontend up
+
+    - name: Wait for platform to stabilise
+      shell: bash
+      run: sleep 15
+
+    - name: List running containers
+      shell: bash
+      run: docker ps -a
+
+    - name: Debug Backend logs
+      shell: bash
+      run: docker logs identity-services-identity-service-helper || true
+    - name: Debug Backend health endpoint debug
+      shell: bash
+      run: docker compose -p identity-services exec -T identity-service-helper curl -v http://localhost:3001/health
+
+    - name: Ensure report directories exist
+      shell: bash
+      run: |
+        mkdir -p identity-service-journey-tests/allure-report
+        mkdir -p identity-service-journey-tests/playwright-report
+
+    - name: Run journey-tests inside Docker
+      working-directory: identity-service-journey-tests
+      shell: bash
+      env:
+        TEST_INPUT: ${{ inputs.test }}
+        TAG_INPUT: ${{ inputs.tag }}
+      run: |
+        FILTER=""
+
+        if [[ -n "$TEST_INPUT" ]]; then
+          FILTER="$TEST_INPUT"
+        fi
+
+        if [[ -n "$TAG_INPUT" ]]; then
+          if [[ -n "$FILTER" ]]; then
+            FILTER="$FILTER|$TAG_INPUT"
+          else
+            FILTER="$TAG_INPUT"
+          fi
+        fi
+
+        echo "Running tests with filter: $FILTER"
+
+        if [[ -z "$FILTER" ]]; then
+          docker compose -p identity-services -f compose.yml up --build --abort-on-container-exit
+        else
+          docker compose -p identity-services -f compose.yml run --rm --build journey-tests \
+            sh -c "npm ci && npx playwright test --grep='$FILTER'"
+        fi
+      
+    - name: Debug Inspect identity-services network
       if: always()
-      run: |
-        docker compose logs > logs.txt
-        docker ps
       shell: bash
-    - name: Upload allure report
+      run: docker network inspect identity-services
+
+    - name: Upload Allure results
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: allure-report
-        path: ./allure-report
-    - name: Upload docker compose logs
+        name: allure-results
+        path: identity-service-journey-tests/allure-results
+        if-no-files-found: ignore
+
+    - name: Upload Playwright HTML report
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: docker-compose-logs
-        path: ./logs.txt
+        name: playwright-report
+        path: identity-service-journey-tests/playwright-report/html
+        if-no-files-found: ignore
+
+    - name: Collect Docker logs
+      if: always()
+      shell: bash
+      run: |
+        echo "Docker container logs" > logs.txt
+        echo "=====================" >> logs.txt
+        docker ps -a >> logs.txt
+
+        for c in $(docker ps -a --format "{{.Names}}"); do
+          echo "=====================" >> logs.txt
+          echo "CONTAINER: $c" >> logs.txt
+          echo "=====================" >> logs.txt
+          docker logs $c >> logs.txt 2>&1 || true
+        done
+
+    - name: Upload docker logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-logs
+        path: logs.txt
+
+    # Stop platform (UI + backend)
+    - name: Stop platform
+      if: always()
+      working-directory: identity-service-journey-tests/bin
+      shell: bash
+      run: ./platform.sh frontend down && ./platform.sh backend down
+
+    - name: Post Slack report
+      if: always()
+      env:
+        SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
+        BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      working-directory: identity-service-journey-tests
+      shell: bash
+      run: |
+        if [[ -z "$SLACK_WEBHOOK_URL" ]]; then
+          echo "Slack webhook not provided; skipping"
+          exit 0
+        fi
+        node post-slack-report.mjs

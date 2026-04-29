@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+      - 'feature/**'
+      - 'bugfix/**'
+      - 'hotfix/**'
+      - 'test/**'
+      - 'ULITP-**'
 
 permissions:
   id-token: write
@@ -27,3 +32,11 @@ jobs:
         uses: DEFRA/cdp-build-action/build-test@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  journey-tests:
+    needs: build
+    uses: ./.github/workflows/journey-tests.yml
+    with:
+      test: ''
+      tag: ''
+    secrets: inherit
