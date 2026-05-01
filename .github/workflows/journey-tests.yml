@@ -78,15 +78,19 @@ jobs:
           chmod -R +x identity-service-handler/**/*.sh || true
           chmod -R +x identity-service-journey-tests/**/*.sh || true
 
-      # Create cads-tools network early (other projects reference as external)
-      - name: Ensure identity-service network exists
+      # Create identity-service network early (other projects reference as external)
+      - name: Ensure identity-services network exists
         shell: bash
         run: |
-          if ! docker network inspect identity-service >/dev/null 2>&1; then
+          if ! docker network inspect identity-services >/dev/null 2>&1; then
             docker network create \
-              --label com.docker.compose.network=identity-service \
-              identity-service
+              --label com.docker.compose.network=identity-services \
+              identity-services
           fi
+
+      # FIX: Set ROOT_DIR so Localstack init scripts mount correctly
+      - name: Set ROOT_DIR for compose mounts
+        run: echo "ROOT_DIR=${{ github.workspace }}" >> $GITHUB_ENV
 
       # Start platform (backend + UI)
       - name: Start platform
