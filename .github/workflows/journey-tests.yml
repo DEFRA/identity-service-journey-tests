@@ -39,7 +39,7 @@ on:
       branch-set:
         required: false
         type: string
-        default: ${{ github.ref.name }}
+        default: develop
       slack-webhook-url:
         required: false
         type: string
@@ -54,21 +54,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: DEFRA/identity-service-helper
-          ref: ${{ inputs.branch-set }}
+          ref: main
           path: identity-service-helper
 
       - name: Checkout identity-service-handler
         uses: actions/checkout@v4
         with:
           repository: DEFRA/identity-service-handler
-          ref: ${{ inputs.branch-set }}
+          ref: main
           path: identity-service-handler
 
       - name: Checkout identity-service-journey-tests
         uses: actions/checkout@v4
         with:
           repository: DEFRA/identity-service-journey-tests
-          ref: ${{ inputs.branch-set }}
+          ref: ${{ inputs.branch-set == 'main' && 'main' || github.ref }}
           path: identity-service-journey-tests
 
       - name: Fix permissions for platform scripts
