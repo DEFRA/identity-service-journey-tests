@@ -31,8 +31,8 @@ start_backend() {
 	cd "$IDENTITY_SERVICE_BACKEND_DIR"
 
 	if [ "${CI:-}" = "true" ]; then
-		echo "[platform] Using backend compose file: compose.yml"
-		docker compose -p identity-services -f compose.yml up --build -d
+		echo "[platform] Using backend compose file: compose.yml and compose.override.yml detached"
+		docker compose -p identity-services -f compose.yml -f compose.override.yml up --build -d
 	else
 		echo "[platform] Using backend compose file: compose.yml and compose.override.yml"
 		docker compose -p identity-services -f compose.yml -f compose.override.yml up --build
@@ -44,13 +44,7 @@ start_backend() {
 stop_backend() {
 	echo "[platform] Stopping identity service helper..."
 	cd "$IDENTITY_SERVICE_BACKEND_DIR"
-
-	if [ "${CI:-}" = "true" ]; then
-		docker compose -p identity-services -f compose.yml down || true
-	else
-		docker compose -p identity-services -f compose.yml -f compose.override.yml down || true
-	fi
-
+	docker compose -p identity-services -f compose.yml -f compose.override.yml down || true
 	return $?
 }
 
@@ -59,8 +53,8 @@ start_ui() {
 	cd "$IDENTITY_SERVICE_FRONTEND_DIR"
 
 	if [ "${CI:-}" = "true" ]; then
-		echo "[platform] Using UI compose file: compose.yml"
-		docker compose -p identity-services -f compose.yml up --build -d
+		echo "[platform] Using UI compose file: compose.yml and compose.override.yml detached"
+		docker compose -p identity-services -f compose.yml -f compose.override.yml up --build -d
 	else
 		echo "[platform] Using UI compose file: compose.yml and compose.override.yml"
 		docker compose -p identity-services -f compose.yml -f compose.override.yml up --build
@@ -72,13 +66,7 @@ start_ui() {
 stop_ui() {
 	echo "[platform] Stopping identity service handler..."
 	cd "$IDENTITY_SERVICE_FRONTEND_DIR"
-
-	if [ "${CI:-}" = "true" ]; then
-		docker compose -p identity-services -f compose.yml down || true
-	else
-		docker compose -p identity-services -f compose.yml -f compose.override.yml down || true
-	fi
-
+	docker compose -p identity-services -f compose.yml -f compose.override.yml down || true
 	return $?
 }
 
