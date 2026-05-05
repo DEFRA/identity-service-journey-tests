@@ -5,9 +5,8 @@ on:
     branches:
       - main
       - 'feature/**'
-      - 'bugfix/**'
       - 'hotfix/**'
-      - 'test/**'
+      - 'release/**'
 
 permissions:
   id-token: write
