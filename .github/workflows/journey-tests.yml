@@ -54,21 +54,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: DEFRA/identity-service-helper
-          ref: ${{ inputs.branch-set }}
+          ref: ${{ github.ref.name }}
           path: identity-service-helper
 
       - name: Checkout identity-service-handler
         uses: actions/checkout@v4
         with:
           repository: DEFRA/identity-service-handler
-          ref: ${{ inputs.branch-set }}
+          ref: ${{ github.ref.name }}
           path: identity-service-handler
 
       - name: Checkout identity-service-journey-tests
         uses: actions/checkout@v4
         with:
           repository: DEFRA/identity-service-journey-tests
-          ref: ${{ inputs.branch-set }}
+          ref: ${{ github.ref.name }}
           path: identity-service-journey-tests
 
       - name: Fix permissions for platform scripts
