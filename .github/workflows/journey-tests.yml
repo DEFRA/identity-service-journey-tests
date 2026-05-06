@@ -88,6 +88,16 @@ jobs:
           chmod -R +x identity-service-handler/**/*.sh || true
           chmod -R +x identity-service-journey-tests/**/*.sh || true
 
+      - name: Copy identity-service-handler.env into identity-service-handler for compose
+        shell: bash
+        run: |
+          cp identity-service-journey-tests/docker/config/identity-service-handler.env identity-service-handler/compose/identity-service-handler.env
+
+      - name: Copy identity-service-helper.env into identity-service-helper for compose
+        shell: bash
+        run: |
+          cp identity-service-journey-tests/docker/config/identity-service-helper.env identity-service-helper/compose/identity-service-helper.env
+
       # Create identity-service network early (other projects reference as external)
       - name: Ensure identity-services network exists
         shell: bash
