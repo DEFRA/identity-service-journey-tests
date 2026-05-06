@@ -44,7 +44,7 @@ on:
       branch-set:
         required: false
         type: string
-        default: main
+        default: ${{ github.ref_name }}
       slack-webhook-url:
         required: false
         type: string

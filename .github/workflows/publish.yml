@@ -38,5 +38,4 @@ jobs:
     with:
       test: ''
       tag: ''
-      branch-set: ${{ github.ref.name }}
     secrets: inherit
