@@ -26,6 +26,11 @@ on:
           - ''
           - 'smoke'
           - 'e2e'
+      branch-set:
+        description: 'Which branch to test (branch names must match across all repos)'
+        type: string
+        required: false
+        default: main
   workflow_call:
     inputs:
       test:
@@ -39,7 +44,7 @@ on:
       branch-set:
         required: false
         type: string
-        default: ${{ github.ref.name }}
+        default: main
       slack-webhook-url:
         required: false
         type: string
@@ -50,25 +55,30 @@ jobs:
     timeout-minutes: 45
 
     steps:
+      - name: Print Branch Name
+        shell: bash
+        run: |
+          echo "Branch set for checkout ref: ${{ inputs.branch-set }}"
+
       - name: Checkout identity-service-helper
         uses: actions/checkout@v4
         with:
           repository: DEFRA/identity-service-helper
-          ref: ${{ github.ref.name }}
+          ref: ${{ inputs.branch-set }}
           path: identity-service-helper
 
       - name: Checkout identity-service-handler
         uses: actions/checkout@v4
         with:
           repository: DEFRA/identity-service-handler
-          ref: ${{ github.ref.name }}
+          ref: ${{ inputs.branch-set }}
           path: identity-service-handler
 
       - name: Checkout identity-service-journey-tests
         uses: actions/checkout@v4
         with:
           repository: DEFRA/identity-service-journey-tests
-          ref: ${{ github.ref.name }}
+          ref: ${{ inputs.branch-set }}
           path: identity-service-journey-tests
 
       - name: Fix permissions for platform scripts
