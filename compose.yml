@@ -19,10 +19,10 @@ services:
       - ./allure-report:/app/allure-report
       - ./playwright-report:/app/playwright-report
     networks:
-      - cads-tools
+      - identity-services
 
 networks:
-  cads-tools:
+  identity-services:
     external: true
   default:
     external: true
