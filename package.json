@@ -31,7 +31,7 @@
     "prepare": "husky",
     "test": "npm run test:playwright",
     "test:playwright": "npx playwright install && npm run clean && npx bddgen && npx playwright test --config=playwright.config.ts",
-    "report": "npx allure generate allure-results --single-file --clean",
+    "report": "allure generate allure-results --single-file --clean",
     "report:publish": "npm run report; ./bin/publish-tests.sh"
   },
   "lint-staged": {
@@ -48,6 +48,7 @@
     "@types/node": "25.6.0",
     "@typescript-eslint/eslint-plugin": "8.58.2",
     "@typescript-eslint/parser": "8.58.2",
+    "allure-commandline": "2.40.0",
     "allure-playwright": "3.7.1",
     "commitlint": "20.5.0",
     "dotenv": "17.4.2",

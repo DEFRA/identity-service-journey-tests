@@ -43,10 +43,10 @@ fi
 
 if [ -z "$FILTER" ]; then
   echo "No filters provided. Running all tests for environment: $ENVIRONMENT"
-  CDP=true ENVIRONMENT="$ENVIRONMENT" npx bddgen && npx playwright test --config=playwright.config.ts
+  CDP=true ENVIRONMENT="$ENVIRONMENT" npx bddgen && npx playwright test --config=playwright.config.ts || touch FAILED
 else
   echo "Running filtered tests with grep: $FILTER"
-  CDP=true ENVIRONMENT="$ENVIRONMENT" npx bddgen && npx playwright test --config=playwright.config.ts --grep="$FILTER"
+  CDP=true ENVIRONMENT="$ENVIRONMENT" npx bddgen && npx playwright test --config=playwright.config.ts --grep="$FILTER"  || touch FAILED
 fi
 
 # Skip publishing when running in GitHub Actions
@@ -58,14 +58,12 @@ else
 
   if [ $publish_exit_code -ne 0 ]; then
     echo "failed to publish test results"
-    exit $publish_exit_code
   fi
 fi
 
 # At the end of the test run, if the suite has failed we write a file called 'FAILED'
 if [ -f FAILED ]; then
   echo "test suite failed"
-  cat ./FAILED
   exit 1
 fi
 
