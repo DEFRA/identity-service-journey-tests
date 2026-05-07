@@ -31,7 +31,7 @@
     "prepare": "husky",
     "test": "npm run test:playwright",
     "test:playwright": "npx playwright install && npm run clean && npx bddgen && npx playwright test --config=playwright.config.ts",
-    "report": "allure generate allure-results --single-file --clean",
+    "report": "npx allure generate allure-results --single-file --clean",
     "report:publish": "npm run report; ./bin/publish-tests.sh"
   },
   "lint-staged": {

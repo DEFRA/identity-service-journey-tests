@@ -43,10 +43,10 @@ fi
 
 if [ -z "$FILTER" ]; then
   echo "No filters provided. Running all tests for environment: $ENVIRONMENT"
-  CDP=true ENVIRONMENT="$ENVIRONMENT" npx playwright test --config=playwright.config.ts
+  CDP=true ENVIRONMENT="$ENVIRONMENT" npx bddgen && npx playwright test --config=playwright.config.ts
 else
   echo "Running filtered tests with grep: $FILTER"
-  CDP=true ENVIRONMENT="$ENVIRONMENT" npx playwright test --config=playwright.config.ts --grep="$FILTER"
+  CDP=true ENVIRONMENT="$ENVIRONMENT" npx bddgen && npx playwright test --config=playwright.config.ts --grep="$FILTER"
 fi
 
 # Skip publishing when running in GitHub Actions
