@@ -133,7 +133,14 @@ jobs:
         run: docker logs identity-service-helper || true
       - name: Debug Backend health endpoint debug
         shell: bash
-        run: docker compose -p identity-services exec -T identity-service-helper curl -v http://localhost:8080/health
+        run: docker compose -p identity-services exec -T identity-service-helper curl -v http://identity-service-helper:8080/health
+
+      - name: Debug Frontend logs
+        shell: bash
+        run: docker logs identity-services-identity-service-handler-1 || true
+      - name: Debug Frontend health endpoint debug
+        shell: bash
+        run: docker compose -p identity-services exec -T identity-service-helper curl -v -k https://identity-service-handler:3000/health
 
       - name: Ensure report directories exist
         shell: bash
