@@ -1,4 +1,4 @@
-cads-journey-tests
+identity-service-journey-tests
 
 A Playwright-based end-to-end and API test suite for the Identity Service.  
 Tests can be executed locally, in CI (GitHub Actions), or on the CDP Platform using the published Docker image.
@@ -212,7 +212,7 @@ The test suite includes a helper script located at:
 
 ```
 
-This script provides a consistent way to start and stop the **local CADS platform**, including:
+This script provides a consistent way to start and stop the **local Identity Service platform**, including:
 
 - shared infrastructure (LocalStack, Redis, PostgreSQL, etc.)
 - backend service (`identity-service-helper`)
