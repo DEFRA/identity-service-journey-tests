@@ -49,6 +49,19 @@ const reporters: ReporterDescription[] = [
   ['allure-playwright', { reportDir: 'allure-report' }]
 ]
 
+// Enable GitHub reporter ONLY inside GitHub Actions runner
+if (process.env.GITHUB_ACTIONS === 'true') {
+  reporters.push([
+    'playwright-ctrf-json-reporter',
+    {
+      outputDir: 'playwright-report', // Optional: Output directory path. Defaults to '.' (project root).
+      screenshot: true, // Optional: Include screenshots in the report. Defaults to 'false'.
+      testType: 'Journey tests', // Optional: Specify the test type (e.g., 'api', 'e2e'). Defaults to 'e2e'.
+      buildName: 'Identity Service Build' // Optional: Specify the build name.
+    }
+  ])
+}
+
 const testDir = defineBddConfig({
   features: 'tests/features/**/*.feature',
   steps: 'tests/features/step-definitions/**/*.ts'
