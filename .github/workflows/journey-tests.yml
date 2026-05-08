@@ -117,11 +117,12 @@ jobs:
         working-directory: identity-service-journey-tests/bin
         shell: bash
         env:
-          OIDC_SIGNING_CERT: ${{ secrets.OIDC_SIGNING_CERT }}
-          OIDC_SIGNING_KEY: ${{ secrets.OIDC_SIGNING_KEY }}
           B2C_CLIENT_ID: ${{ secrets.B2C_CLIENT_ID }}
           B2C_CLIENT_SECRET: ${{ secrets.B2C_CLIENT_SECRET }}
           B2C_SERVICE_ID: ${{ secrets.B2C_SERVICE_ID }}
+          NODE_ENV: development
+          OIDC_SIGNING_CERT: ${{ secrets.OIDC_SIGNING_CERT }}
+          OIDC_SIGNING_KEY: ${{ secrets.OIDC_SIGNING_KEY }}
           SESSION_COOKIE_PASSWORD: ${{ secrets.SESSION_COOKIE_PASSWORD }}
         run: |
           chmod +x platform.sh
