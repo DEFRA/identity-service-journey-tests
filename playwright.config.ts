@@ -2,7 +2,6 @@ import * as dotenv from 'dotenv'
 import * as fs from 'fs'
 import { defineConfig, devices } from '@playwright/test'
 import { defineBddConfig } from 'playwright-bdd'
-import type { GitHubActionOptions } from '@estruyf/github-actions-reporter'
 import { ReporterDescription } from 'playwright/test'
 
 const serverTimeout = 2 * 60 * 1000
@@ -49,18 +48,6 @@ const reporters: ReporterDescription[] = [
   ['json', { outputFile: 'playwright-report/results.json' }],
   ['allure-playwright', { reportDir: 'allure-report' }]
 ]
-
-// Enable GitHub reporter ONLY inside GitHub Actions runner
-if (process.env.GITHUB_ACTIONS === 'true') {
-  reporters.push([
-    '@estruyf/github-actions-reporter',
-    <GitHubActionOptions>{
-      title: `Journey Tests on environment: ${ENV}`,
-      useDetails: true,
-      showError: true
-    }
-  ])
-}
 
 const testDir = defineBddConfig({
   features: 'tests/features/**/*.feature',
