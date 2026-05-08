@@ -60,6 +60,11 @@ jobs:
         run: |
           echo "Branch set for checkout ref: ${{ inputs.branch-set }}"
 
+      - name: Dump GitHub Environment for Debugging
+        shell: bash
+        run: |
+          echo "$GITHUB_ENV: ${{ toJson(env) }}"
+
       - name: Checkout identity-service-helper
         uses: actions/checkout@v4
         with:
