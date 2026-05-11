@@ -186,6 +186,13 @@ jobs:
               sh -c "npm ci && npx playwright test --grep='$FILTER'"
           fi
 
+      - name: Merge CTRF JSON reports
+        if: always()
+        shell: bash
+        run: |
+          chmod -R u+rwX identity-service-journey-tests/playwright-report || true
+          npx ctrf merge identity-service-journey-tests/playwright-report/
+
       - name: Debug Inspect identity-services network
         if: always()
         shell: bash
@@ -228,12 +235,6 @@ jobs:
         with:
           name: docker-logs
           path: logs.txt
-
-      - name: Merge CTRF JSON reports
-        if: always()
-        shell: bash
-        run: |
-          npx ctrf merge identity-service-journey-tests/playwright-report/
 
       - name: Publish Test Report with Insights
         uses: ctrf-io/github-test-reporter@v1
