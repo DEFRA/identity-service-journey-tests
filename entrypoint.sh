@@ -49,8 +49,11 @@ else
   CDP=true ENVIRONMENT="$ENVIRONMENT" npx bddgen && npx playwright test --config=playwright.config.ts --grep="$FILTER"  || touch FAILED
 fi
 
+# Merge the CTRF JSON reports into a single report file for Github actions summary and publishing
 # Skip publishing when running in GitHub Actions
 if [ "$GITHUB_ACTIONS" = "true" ]; then
+  echo "Merging CTRF JSON reports for GitHub Actions summary"
+  npm run merge:report
   echo "Skipping test result publishing in CI"
 else
   npm run report:publish

@@ -28,6 +28,7 @@
     "git:pre-commit-hook": "npm run format:check && npm run lint",
     "lint": "eslint \"tests/**/*.ts\" \"playwright.config.ts\"",
     "lint:fix": "eslint \"tests/**/*.ts\" \"playwright.config.ts\" --fix",
+    "merge:report": "npx ctrf merge playwright-report/",
     "prepare": "husky",
     "test": "npm run test:playwright",
     "test:playwright": "npx playwright install && npm run clean && npx bddgen && npx playwright test --config=playwright.config.ts",
