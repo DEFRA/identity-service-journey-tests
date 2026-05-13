@@ -4,15 +4,19 @@ on:
   push:
     branches:
       - main
+      - 'feature/**'
+      - 'hotfix/**'
+      - 'release/**'
 
 permissions:
   id-token: write
   contents: write
   pull-requests: write
+  checks: write
 
 env:
   AWS_REGION: eu-west-2
-  AWS_ACCOUNT_ID: "094954420758"
+  AWS_ACCOUNT_ID: '094954420758'
 
 jobs:
   build:
@@ -27,3 +31,11 @@ jobs:
         uses: DEFRA/cdp-build-action/build-test@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  journey-tests:
+    needs: build
+    uses: ./.github/workflows/journey-tests.yml
+    with:
+      test: ''
+      tag: ''
+    secrets: inherit
