@@ -55,23 +55,38 @@ jobs:
     timeout-minutes: 45
 
     steps:
-      - name: Print Branch Name
-        shell: bash
-        run: |
-          echo "Branch set for checkout ref: ${{ inputs.branch-set }}"
-
-      - name: Checkout identity-service-helper
+      - name: Checkout identity-service-helper referenced by branch-set input
         uses: actions/checkout@v4
+        id: helper-checkout-branch
+        continue-on-error: true
         with:
           repository: DEFRA/identity-service-helper
           ref: ${{ inputs.branch-set }}
           path: identity-service-helper
 
-      - name: Checkout identity-service-handler
+      - name: Checkout identity-service-helper main branch if the previous checkout failed (e.g. branch doesn't exist in helper repo)
+        if: steps.helper-checkout-branch.outcome == 'failure'
         uses: actions/checkout@v4
+        with:
+          repository: DEFRA/identity-service-helper
+          ref: main
+          path: identity-service-helper
+
+      - name: Checkout identity-service-handler referenced by branch-set input
+        uses: actions/checkout@v4
+        id: handler-checkout-branch
+        continue-on-error: true
         with:
           repository: DEFRA/identity-service-handler
           ref: ${{ inputs.branch-set }}
+          path: identity-service-handler
+
+      - name: Checkout identity-service-handler main branch if the previous checkout failed (e.g. branch doesn't exist in handler repo)
+        if: steps.handler-checkout-branch.outcome == 'failure'
+        uses: actions/checkout@v4
+        with:
+          repository: DEFRA/identity-service-handler
+          ref: main
           path: identity-service-handler
 
       - name: Checkout identity-service-journey-tests
