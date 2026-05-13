@@ -251,16 +251,4 @@ jobs:
         shell: bash
         run: ./platform.sh frontend down && ./platform.sh backend down
 
-      - name: Post Slack report
-        if: always()
-        env:
-          SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
-          BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        working-directory: identity-service-journey-tests
-        shell: bash
-        run: |
-          if [[ -z "$SLACK_WEBHOOK_URL" ]]; then
-            echo "Slack webhook not provided; skipping"
-            exit 0
-          fi
-          node post-slack-report.mjs
+      # Slack reporting is covered by CDP notification integration and is setup for DEV, Test and Ext-Test environments
