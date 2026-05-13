@@ -57,7 +57,7 @@ runs:
         echo "API EXT: $IDENTITY_SERVICE_BACKEND_EXTERNAL_BASE_URL"
 
     # Run Playwright tests
-    - name: Run tests
+    - name: Run Identity Service Journey Tests
       working-directory: identity-service-journey-tests
       shell: bash
       env:
@@ -93,17 +93,4 @@ runs:
         name: playwright-report
         path: identity-service-journey-tests/playwright-report/html
 
-    # Slack notification
-    - name: Post Slack Report
-      if: always()
-      working-directory: identity-service-journey-tests
-      shell: bash
-      env:
-        SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
-        BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      run: |
-        if [[ -z "$SLACK_WEBHOOK_URL" ]]; then
-          echo "Slack webhook not provided; skipping"
-          exit 0
-        fi
-        node post-slack-report.mjs
+    # Slack notification is handled on CDP Portal Notifictions side

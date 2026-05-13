@@ -232,14 +232,15 @@ jobs:
       - name: Publish Test Report with Insights
         uses: ctrf-io/github-test-reporter@v1
         with:
-          report-path: identity-service-journey-tests/playwright-report/*.json
-          summary-delta-report: true
-          insights-report: true
-          flaky-rate-report: true
           fail-rate-report: true
-          slowest-report: true
-          upload-artifact: true
+          flaky-rate-report: true
+          github-report: true
+          insights-report: true
           pull-request-report: true
+          report-path: identity-service-journey-tests/playwright-report/*.json
+          slowest-report: true
+          summary-delta-report: true
+          upload-artifact: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: always()

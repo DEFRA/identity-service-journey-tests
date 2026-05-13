@@ -3,9 +3,11 @@ import { StatusCodes } from 'http-status-codes'
 
 export abstract class BaseClient {
   protected readonly apiContext: APIRequestContext
+  protected readonly serviceName?: string
 
-  constructor(apiContext: APIRequestContext) {
+  constructor(apiContext: APIRequestContext, serviceName?: string) {
     this.apiContext = apiContext
+    this.serviceName = serviceName
   }
 
   // eslint-disable-next-line
@@ -25,8 +27,7 @@ export abstract class BaseClient {
           }
         }
       }
-      // APIRequestContext removes /identity-service-helper from the endpoint
-      const absoluteUrl = '/identity-service-helper' + url
+      const absoluteUrl = this.serviceName ? `/${this.serviceName}` + url : url
       const apiKeyOptions = options
       return { apiKeyOptions, absoluteUrl }
     } else {

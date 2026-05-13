@@ -17,14 +17,20 @@ Given('the identity service helper is running', async function () {
         ? process.env.apiURLExt
         : process.env.apiURL
   })
-  client = new IdentityServiceHelperClient(apiContext)
+  client = new IdentityServiceHelperClient(
+    apiContext,
+    'identity-service-helper'
+  )
 })
 
 Given('the identity service handler is running', async function () {
   const apiContext = await request.newContext({
     baseURL: process.env.uiURL
   })
-  client = new IdentityServiceHandlerClient(apiContext)
+  client = new IdentityServiceHandlerClient(
+    apiContext,
+    'identity-service-handler'
+  )
 })
 
 When('I check the health endpoint', async function () {
