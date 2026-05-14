@@ -17,7 +17,10 @@ Given('the identity service helper is running', async function () {
         ? process.env.apiURLExt
         : process.env.apiURL
   })
-  client = new IdentityServiceHelperClient(apiContext)
+  client = new IdentityServiceHelperClient(
+    apiContext,
+    'identity-service-helper'
+  )
 })
 
 Given('the identity service handler is running', async function () {

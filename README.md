@@ -201,6 +201,8 @@ CI uploads:
 
 - allure-results/ (raw Allure data)
 - playwright-report/html/ (Playwright HTML report)
+- ctrf-report (A merged CTRF JSON formatted report for Github Actions)
+- docker-logs (Docker related logs)
 
 CI does not generate the Allure HTML report (allure-report/), because the entrypoint intentionally skips publishing when GITHUB_ACTIONS=true.
 
@@ -231,10 +233,7 @@ The script:
    - `identity-service-handler` (frontend)
 2. Ensures the shared Docker network `identity-services` exists
 4. Selects the correct Docker Compose override file:
-   - `docker-compose.override.yml` (local)
-   - `docker-compose.override.mac.intel.yml` (Intel Macs)
-   - `docker-compose.override.mac.arm.yml` (Apple Silicon)
-   - `docker-compose.ci-override.yml` (GitHub Actions)
+   - `compose.override.yml` (local and GitHub Actions)
 5. Starts or stops:
    - shared infra
    - backend
@@ -267,13 +266,6 @@ Stop the identity service helper:
 
 ```bash
 ./bin/platform.sh backend down
-```
-
-Mac‑specific overrides:
-
-```
-./bin/platform.sh frontend/backend up --mac-intel
-./bin/platform.sh frontend/backend up --mac-arm
 ```
 
 `bin/platform.sh` provides a **unified orchestration layer** for local and CI environments:
