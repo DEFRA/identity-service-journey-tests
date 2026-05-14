@@ -27,7 +27,10 @@ export abstract class BaseClient {
           }
         }
       }
-      const absoluteUrl = this.serviceName ? `/${this.serviceName}` + url : url
+      const absoluteUrl =
+        this.serviceName && this.serviceName === 'identity-service-helper'
+          ? `/${this.serviceName}` + url
+          : url
       const apiKeyOptions = options
       return { apiKeyOptions, absoluteUrl }
     } else {

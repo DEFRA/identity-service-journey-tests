@@ -33,7 +33,7 @@ process.env.apiURL = api
 process.env.apiURLExt = apiExt
 process.env.apiKey =
   !process.env.CI && ENV === 'dev' && process.env.CDP === undefined
-    ? 'API_KEY'
+    ? process.env.EPHEMERAL_API_KEY
     : undefined
 
 const reporters: ReporterDescription[] = [
