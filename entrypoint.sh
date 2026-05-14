@@ -16,6 +16,7 @@ echo "------------------------------------------------------------"
 echo "ENVIRONMENT:              ${ENVIRONMENT:-<not set>}"
 echo "PROFILE:                  ${PROFILE:-<not set>}"
 echo "CI:                       ${CI:-<not set>}"
+echo "CDP:                      ${CDP:-<not set>}"
 echo ""
 
 echo "IDENTITY_SERVICE_FRONTEND_BASE_URL:         ${IDENTITY_SERVICE_FRONTEND_BASE_URL:-<not set>}"
