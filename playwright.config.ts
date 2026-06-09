@@ -3,6 +3,7 @@ import * as fs from 'fs'
 import { defineConfig, devices } from '@playwright/test'
 import { defineBddConfig } from 'playwright-bdd'
 import { ReporterDescription } from 'playwright/test'
+import { v4 as uuidv4 } from 'uuid'
 
 const serverTimeout = 2 * 60 * 1000
 // Set Environment
@@ -34,7 +35,10 @@ process.env.apiURLExt = apiExt
 process.env.apiKey =
   !process.env.CI && ENV === 'dev' && process.env.CDP === undefined
     ? process.env.EPHEMERAL_API_KEY
-    : undefined
+    : process.env.X_API_KEY
+process.env.operatorId = process.env.X_API_OPERATOR_ID
+process.env.correlationId = uuidv4()
+process.env.isCDPEnvironment = isCDPEnvironment.toString()
 
 const reporters: ReporterDescription[] = [
   ['list'], // CLI console output
@@ -64,7 +68,10 @@ if (process.env.GITHUB_ACTIONS === 'true') {
 
 const testDir = defineBddConfig({
   features: 'tests/features/**/*.feature',
-  steps: 'tests/features/step-definitions/**/*.ts'
+  steps: [
+    'tests/features/step-definitions/**/*.ts',
+    'tests/fixtures/**/*.fixture.ts'
+  ]
 })
 
 export default defineConfig({

@@ -1,3 +1,4 @@
+@health
 Feature: Identity Service Helper - Health Checks
 
   Background: Ensure the identity service helper is running

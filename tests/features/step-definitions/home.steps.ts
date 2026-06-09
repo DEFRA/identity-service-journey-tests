@@ -1,8 +1,7 @@
-import { createBdd } from 'playwright-bdd'
+import { Given, Then } from '../../fixtures/test.fixture'
 import { HomePage } from '../support/page-objects/home.page'
 import { expect } from '@playwright/test'
 
-const { Given, Then } = createBdd()
 let homePage: HomePage
 
 Given('I am on the identity service handler home page', async ({ page }) => {
