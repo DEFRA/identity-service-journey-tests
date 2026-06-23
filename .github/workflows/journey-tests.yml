@@ -139,6 +139,7 @@ jobs:
           OIDC_SIGNING_CERT: ${{ secrets.OIDC_SIGNING_CERT }}
           OIDC_SIGNING_KEY: ${{ secrets.OIDC_SIGNING_KEY }}
           SESSION_COOKIE_PASSWORD: ${{ secrets.SESSION_COOKIE_PASSWORD }}
+          TLS_ENABLED: ${{ env.TLS_ENABLED }}
         run: |
           chmod +x platform.sh
           ./platform.sh backend up && ./platform.sh frontend up
@@ -163,7 +164,7 @@ jobs:
         run: docker logs identity-services-identity-service-handler-1 || true
       - name: Debug Frontend health endpoint debug
         shell: bash
-        run: docker compose -p identity-services exec -T identity-service-helper curl -v -k http://identity-service-handler:3000/health
+        run: docker compose -p identity-services exec -T identity-service-handler curl -v -k https://identity-service-handler:3000/health
 
       - name: Ensure report directories exist
         shell: bash
