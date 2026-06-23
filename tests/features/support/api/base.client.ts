@@ -19,14 +19,12 @@ export abstract class BaseClient {
         }
         options.headers['Content-Type'] = 'application/json'
         options.headers['x-api-key'] = process.env.apiKey
-        options.headers['x-operator-id'] = process.env.operatorId
         options.headers['x-correlation-id'] = process.env.correlationId
       } else {
         options = {
           headers: {
             'Content-Type': 'application/json',
             'x-api-key': process.env.apiKey,
-            'x-operator-id': process.env.operatorId,
             'x-correlation-id': process.env.correlationId
           }
         }

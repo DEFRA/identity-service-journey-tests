@@ -1,4 +1,4 @@
-type CPHItems = {
+export type CPHItem = {
   id: string
   county_parish_holding_number: string
   expired: boolean
@@ -7,7 +7,7 @@ type CPHItems = {
 }
 
 export type CPHResponse = {
-  items: CPHItems[]
+  items: CPHItem[]
   total_count: number
   total_pages: number
   page_number: number

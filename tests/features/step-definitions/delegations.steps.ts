@@ -2,8 +2,10 @@ import { Given, Then, When } from '../../fixtures/test.fixture'
 import { EndPoints } from '../../utils/enums'
 import { StatusCodes } from 'http-status-codes/build/cjs/status-codes'
 import { DelegationResponse } from '../../types/responses/delegationResponse.type'
+import { UserResponse } from '../../types/responses/userResponse.type'
 import { expect } from '@playwright/test'
 import { HttpResponse } from '../../types/responses/httpResponse.type'
+import { SelectedCph } from '../../types/selectedCph.type'
 
 Given(
   'I create a new CPH delegation',
@@ -16,10 +18,13 @@ Given(
     }
     this.delegation =
       await identityServiceHelperClient.post<DelegationResponse>(
-        EndPoints.Delegations,
+        EndPoints.DelegationsApi,
         StatusCodes.CREATED,
         {
-          data: delegationData
+          data: delegationData,
+          headers: {
+            'x-operator-id': process.env.operatorId
+          }
         }
       )
   }
@@ -38,7 +43,7 @@ Given(
   async function ({ identityServiceHelperClient }) {
     const retrievedDelegation =
       await identityServiceHelperClient.get<DelegationResponse>(
-        `${EndPoints.Delegations}/${this.delegation.id}`,
+        `${EndPoints.DelegationsApi}/${this.delegation.id}`,
         StatusCodes.OK
       )
     expect(retrievedDelegation).toBeDefined()
@@ -51,7 +56,7 @@ Given(
   async function ({ identityServiceHelperClient }) {
     this.delegations = await identityServiceHelperClient.get<
       DelegationResponse[]
-    >(EndPoints.Delegations, StatusCodes.OK)
+    >(EndPoints.DelegationsApi, StatusCodes.OK)
   }
 )
 
@@ -68,8 +73,13 @@ When(
   'I accept the CPH delegation invitation',
   async function ({ identityServiceHelperClient }) {
     const response = await identityServiceHelperClient.post(
-      `${EndPoints.Delegations}/${this.delegation.id}:accept`,
-      StatusCodes.NO_CONTENT
+      `${EndPoints.DelegationsApi}/${this.delegation.id}:accept`,
+      StatusCodes.NO_CONTENT,
+      {
+        headers: {
+          'x-operator-id': this.delegatedUser.id
+        }
+      }
     )
     expect(response).toBeDefined()
   }
@@ -80,7 +90,7 @@ Then(
   async function ({ identityServiceHelperClient }) {
     const retrievedDelegation =
       await identityServiceHelperClient.get<DelegationResponse>(
-        `${EndPoints.Delegations}/${this.delegation.id}`,
+        `${EndPoints.DelegationsApi}/${this.delegation.id}`,
         StatusCodes.OK
       )
     expect(retrievedDelegation).toBeDefined()
@@ -93,8 +103,13 @@ When(
   'I reject the CPH delegation invitation',
   async function ({ identityServiceHelperClient }) {
     const response = await identityServiceHelperClient.post(
-      `${EndPoints.Delegations}/${this.delegation.id}:reject`,
-      StatusCodes.NO_CONTENT
+      `${EndPoints.DelegationsApi}/${this.delegation.id}:reject`,
+      StatusCodes.NO_CONTENT,
+      {
+        headers: {
+          'x-operator-id': this.delegatedUser.id
+        }
+      }
     )
     expect(response).toBeDefined()
   }
@@ -105,7 +120,7 @@ Then(
   async function ({ identityServiceHelperClient }) {
     const retrievedDelegation =
       await identityServiceHelperClient.get<DelegationResponse>(
-        `${EndPoints.Delegations}/${this.delegation.id}`,
+        `${EndPoints.DelegationsApi}/${this.delegation.id}`,
         StatusCodes.OK
       )
     expect(retrievedDelegation).toBeDefined()
@@ -118,8 +133,13 @@ When(
   'I revoke the CPH delegation',
   async function ({ identityServiceHelperClient }) {
     const response = await identityServiceHelperClient.post(
-      `${EndPoints.Delegations}/${this.delegation.id}:revoke`,
-      StatusCodes.NO_CONTENT
+      `${EndPoints.DelegationsApi}/${this.delegation.id}:revoke`,
+      StatusCodes.NO_CONTENT,
+      {
+        headers: {
+          'x-operator-id': this.delegatingUser.id
+        }
+      }
     )
     expect(response).toBeDefined()
   }
@@ -130,7 +150,7 @@ Then(
   async function ({ identityServiceHelperClient }) {
     const retrievedDelegation =
       await identityServiceHelperClient.get<DelegationResponse>(
-        `${EndPoints.Delegations}/${this.delegation.id}`,
+        `${EndPoints.DelegationsApi}/${this.delegation.id}`,
         StatusCodes.OK
       )
     expect(retrievedDelegation).toBeDefined()
@@ -142,8 +162,13 @@ When(
   'I expire the CPH delegation',
   async function ({ identityServiceHelperClient }) {
     const response = await identityServiceHelperClient.post(
-      `${EndPoints.Delegations}/${this.delegation.id}:expire`,
-      StatusCodes.NO_CONTENT
+      `${EndPoints.DelegationsApi}/${this.delegation.id}:expire`,
+      StatusCodes.NO_CONTENT,
+      {
+        headers: {
+          'x-operator-id': this.delegatingUser.id
+        }
+      }
     )
     expect(response).toBeDefined()
   }
@@ -153,16 +178,184 @@ Then(
   'the delegation should be expired successfully',
   async function ({ identityServiceHelperClient }) {
     const response = await identityServiceHelperClient.get<HttpResponse>(
-      `${EndPoints.Delegations}/${this.delegation.id}`,
+      `${EndPoints.DelegationsApi}/${this.delegation.id}`,
       StatusCodes.NOT_FOUND
     )
     expect(response).toBeDefined()
     expect(response.title).toEqual('Not Found')
     expect(response.status).toEqual(StatusCodes.NOT_FOUND)
     expect(response.detail).toEqual(
-      'County parish holding delegation not found.'
+      'County parish holding delegation not found'
     )
     expect(response.instance).toEqual(`/delegations/${this.delegation.id}`)
     expect(response.traceId).toBeDefined()
+  }
+)
+
+Given(
+  "I invite a delegate to manage my CPH's",
+  async function ({ identityServiceHelperClient, delegationPage }) {
+    const uuid = crypto.randomUUID()
+    this.delegatedUser = await identityServiceHelperClient.post<UserResponse>(
+      EndPoints.Users,
+      StatusCodes.CREATED,
+      {
+        data: {
+          email: `delegated.user.${uuid}@example.com`,
+          first_name: 'Delegated',
+          last_name: `User ${uuid}`,
+          display_name: `Delegated User ${uuid}`
+        },
+        headers: {
+          'x-operator-id': process.env.operatorId
+        }
+      }
+    )
+    this.selectedCphs = await delegationPage.addNewDelegate(
+      this.delegatedUser.email,
+      this.delegatingUserCphsHeld,
+      identityServiceHelperClient
+    )
+  }
+)
+
+Given(
+  "the delegate should see an invitation to manage the delegator's CPH's",
+  async function ({ invitationsPage }) {
+    await invitationsPage.verifyInvitation(
+      this.delegatingUser.display_name,
+      this.selectedCphs
+    )
+  }
+)
+
+When(
+  'the delegate accepts the invitation',
+  async function ({ invitationsPage }) {
+    this.acceptedInvitations = await invitationsPage.acceptInvitation(
+      this.delegatingUser.display_name,
+      this.selectedCphs
+    )
+  }
+)
+
+When(
+  'the delegate rejects the invitation',
+  async function ({ invitationsPage }) {
+    this.rejectedInvitations = await invitationsPage.rejectInvitation(
+      this.delegatingUser.display_name,
+      this.selectedCphs
+    )
+  }
+)
+
+Then(
+  "I should see the delegate listed as managing my CPH's",
+  async function ({ delegationPage }) {
+    let cphsToProcess =
+      this.acceptedInvitations !== undefined &&
+      this.acceptedInvitations instanceof Array
+        ? this.acceptedInvitations
+        : []
+    if (
+      this.rejectedInvitations !== undefined &&
+      this.rejectedInvitations instanceof Array
+    ) {
+      cphsToProcess = cphsToProcess.concat(this.rejectedInvitations)
+    }
+    await delegationPage.verifyDelegateCphMapping(
+      this.delegatedUser.email,
+      cphsToProcess
+    )
+  }
+)
+
+Then(
+  "I should not see the delegate listed as managing my CPH's",
+  async function ({ delegationPage }) {
+    let cphsToProcess =
+      this.acceptedInvitations !== undefined &&
+      this.acceptedInvitations instanceof Array
+        ? this.acceptedInvitations
+        : []
+    if (
+      this.rejectedInvitations !== undefined &&
+      this.rejectedInvitations instanceof Array
+    ) {
+      cphsToProcess = cphsToProcess.concat(this.rejectedInvitations)
+    }
+    await delegationPage.verifyDelegateCphMapping(
+      this.delegatedUser.email,
+      cphsToProcess
+    )
+  }
+)
+
+Then(
+  'I should not be able to invite a delegate',
+  async function ({ delegationPage }) {
+    const message =
+      'You do not have any County Parish Holdings assigned. You must claim your holdings before you can delegate access to them.'
+    await expect(delegationPage.page.getByText(message)).toBeVisible()
+    await expect(delegationPage.addDelegateButton).not.toBeVisible()
+  }
+)
+
+Given(
+  "I invite a delegate to manage {int} of my CPH's",
+  async function (
+    { identityServiceHelperClient, delegationPage },
+    numberOfCphsToAssign: number
+  ) {
+    const uuid = crypto.randomUUID()
+    this.delegatedUser = await identityServiceHelperClient.post<UserResponse>(
+      EndPoints.Users,
+      StatusCodes.CREATED,
+      {
+        data: {
+          email: `delegated.user.${uuid}@example.com`,
+          first_name: 'Delegated',
+          last_name: `User ${uuid}`,
+          display_name: `Delegated User ${uuid}`
+        },
+        headers: {
+          'x-operator-id': process.env.operatorId
+        }
+      }
+    )
+    this.selectedCphs = await delegationPage.addNewDelegate(
+      this.delegatedUser.email,
+      this.delegatingUserCphsHeld,
+      identityServiceHelperClient,
+      numberOfCphsToAssign
+    )
+  }
+)
+
+When(
+  'the delegate accepts {int} invitation',
+  async function ({ invitationsPage }, numberOfInvitesToAccept: number) {
+    const invitations: SelectedCph[] = []
+    for (let i = 0; i < numberOfInvitesToAccept; i++) {
+      invitations.push(this.selectedCphs.shift())
+    }
+    this.acceptedInvitations = await invitationsPage.acceptInvitation(
+      this.delegatingUser.display_name,
+      invitations
+    )
+  }
+)
+
+When(
+  'the delegate rejects {int} invitation',
+  async function ({ invitationsPage }, numberOfInvitesToDecline: number) {
+    const invitations: SelectedCph[] = []
+    for (let i = 0; i < numberOfInvitesToDecline; i++) {
+      invitations.push(this.selectedCphs.shift())
+    }
+    this.rejectedInvitations = await invitationsPage.rejectInvitation(
+      this.delegatingUser.display_name,
+      invitations
+    )
   }
 )

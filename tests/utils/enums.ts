@@ -1,7 +1,10 @@
 export enum EndPoints {
   Health = '/health',
   UserRoles = '/roles',
-  Cphs = '/cphs?pageNumber=1&pageSize=20',
+  Cphs = '/cphs',
   Users = '/users',
-  Delegations = '/delegations'
+  Delegations = '/account/delegations',
+  DelegationsApi = '/delegations',
+  CreateDelegation = '/account/delegations/create/',
+  Invitations = '/account/invitations'
 }

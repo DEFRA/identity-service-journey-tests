@@ -22,7 +22,7 @@ if (envFile && fs.existsSync(envFile)) {
 
 // Read values from environment variables
 const ui =
-  process.env.IDENTITY_SERVICE_FRONTEND_BASE_URL || 'http://localhost:3000'
+  process.env.IDENTITY_SERVICE_FRONTEND_BASE_URL || 'https://localhost:3000'
 const api =
   process.env.IDENTITY_SERVICE_BACKEND_BASE_URL || 'http://localhost:3001'
 const apiExt = process.env.IDENTITY_SERVICE_BACKEND_EXTERNAL_BASE_URL ?? ''
@@ -141,7 +141,7 @@ export default defineConfig({
           command: 'bin/platform.sh frontend up',
           gracefulShutdown: { signal: 'SIGTERM', timeout: serverTimeout },
           ignoreHTTPSErrors: true,
-          url: 'http://localhost:3000/health',
+          url: 'https://localhost:3000/health',
           reuseExistingServer: !process.env.CI,
           timeout: serverTimeout
         }
