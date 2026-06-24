@@ -113,6 +113,16 @@ jobs:
         run: |
           cp identity-service-journey-tests/docker/config/identity-service-helper.env identity-service-helper/compose/identity-service-helper.env
 
+      - name: Generate TLS certificates for identity-service-handler
+        shell: bash
+        run: |
+            openssl req -x509 -newkey rsa:2048 \
+            -keyout identity-service-handler/certs/localhost-key.pem \
+            -out identity-service-handler/certs/localhost.pem \
+            -days 1 -nodes \
+            -subj "/CN=identity-service-handler" \
+            -addext "subjectAltName=DNS:identity-service-handler,DNS:localhost"
+
       # Create identity-service network early (other projects reference as external)
       - name: Ensure identity-services network exists
         shell: bash
