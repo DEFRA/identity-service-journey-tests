@@ -149,6 +149,7 @@ jobs:
           OIDC_SIGNING_CERT: ${{ secrets.OIDC_SIGNING_CERT }}
           OIDC_SIGNING_KEY: ${{ secrets.OIDC_SIGNING_KEY }}
           SESSION_COOKIE_PASSWORD: ${{ secrets.SESSION_COOKIE_PASSWORD }}
+          TLS_ENABLED: true
         run: |
           chmod +x platform.sh
           ./platform.sh backend up && ./platform.sh frontend up
