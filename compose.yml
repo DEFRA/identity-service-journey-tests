@@ -19,12 +19,8 @@ services:
       - ./allure-report:/app/allure-report
       - ./playwright-report:/app/playwright-report
     networks:
-      - default
-      - shared
+      - identity-services
 
 networks:
-  default:
-    driver: bridge
-  shared:
-    name: identity-services
+  identity-services:
     external: true
