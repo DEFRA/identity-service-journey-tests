@@ -19,8 +19,9 @@ services:
       - ./allure-report:/app/allure-report
       - ./playwright-report:/app/playwright-report
     networks:
-      - identity-services
+      - shared
 
 networks:
-  identity-services:
-    driver: bridge
+  shared:
+    name: identity-services
+    external: true
