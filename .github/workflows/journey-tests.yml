@@ -174,7 +174,7 @@ jobs:
         run: docker logs identity-services-test-site-1 || true
       - name: Debug Test-Site health endpoint
         shell: bash
-        run: docker compose -p identity-services exec -T test-site curl -v -k https://test-site:3005/b2c/.well-known/openid-configuration
+        run: docker compose -p identity-services exec -T test-site curl -v -k https://test-site:3005/b2c/.well-known/openid-configuration || true
 
       - name: Debug Frontend logs
         shell: bash
