@@ -68,16 +68,12 @@ export const test = base.extend<{
     await use(delegatingUserIds)
   },
   delegatorPage: async ({ browser }, use) => {
-    const context = await browser.newContext({
-      //storageState: 'playwright/.auth/delegator.json'
-    })
+    const context = await browser.newContext({})
     await use(await context.newPage())
     await context.close()
   },
   delegatePage: async ({ browser }, use) => {
-    const context = await browser.newContext({
-      //storageState: 'playwright/.auth/delegate.json'
-    })
+    const context = await browser.newContext({})
     await use(await context.newPage())
     await context.close()
   },
