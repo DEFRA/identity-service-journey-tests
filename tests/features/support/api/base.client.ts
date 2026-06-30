@@ -19,16 +19,20 @@ export abstract class BaseClient {
         }
         options.headers['Content-Type'] = 'application/json'
         options.headers['x-api-key'] = process.env.apiKey
+        options.headers['x-correlation-id'] = process.env.correlationId
       } else {
         options = {
           headers: {
             'Content-Type': 'application/json',
-            'x-api-key': process.env.apiKey
+            'x-api-key': process.env.apiKey,
+            'x-correlation-id': process.env.correlationId
           }
         }
       }
       const absoluteUrl =
-        this.serviceName && this.serviceName === 'identity-service-helper'
+        this.serviceName &&
+        this.serviceName === 'identity-service-helper' &&
+        process.env.ENVIRONMENT === 'dev'
           ? `/${this.serviceName}` + url
           : url
       const apiKeyOptions = options
@@ -67,7 +71,11 @@ export abstract class BaseClient {
     url = absoluteUrl
     const response = await this.apiContext.post(url, options)
     expect(response.status()).toEqual(statusCode)
-    return (await response.json()) as T
+    if (statusCode === StatusCodes.NO_CONTENT) {
+      return {} as T
+    } else {
+      return (await response.json()) as T
+    }
   }
 
   protected async postWithResponseReturn(url: string, options?: object) {

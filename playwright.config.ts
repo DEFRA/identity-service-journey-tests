@@ -3,6 +3,7 @@ import * as fs from 'fs'
 import { defineConfig, devices } from '@playwright/test'
 import { defineBddConfig } from 'playwright-bdd'
 import { ReporterDescription } from 'playwright/test'
+import { v4 as uuidv4 } from 'uuid'
 
 const serverTimeout = 2 * 60 * 1000
 // Set Environment
@@ -21,7 +22,7 @@ if (envFile && fs.existsSync(envFile)) {
 
 // Read values from environment variables
 const ui =
-  process.env.IDENTITY_SERVICE_FRONTEND_BASE_URL || 'http://localhost:3000'
+  process.env.IDENTITY_SERVICE_FRONTEND_BASE_URL || 'https://localhost:3000'
 const api =
   process.env.IDENTITY_SERVICE_BACKEND_BASE_URL || 'http://localhost:3001'
 const apiExt = process.env.IDENTITY_SERVICE_BACKEND_EXTERNAL_BASE_URL ?? ''
@@ -34,7 +35,10 @@ process.env.apiURLExt = apiExt
 process.env.apiKey =
   !process.env.CI && ENV === 'dev' && process.env.CDP === undefined
     ? process.env.EPHEMERAL_API_KEY
-    : undefined
+    : process.env.X_API_KEY
+process.env.operatorId = process.env.X_API_OPERATOR_ID
+process.env.correlationId = uuidv4()
+process.env.isCDPEnvironment = isCDPEnvironment.toString()
 
 const reporters: ReporterDescription[] = [
   ['list'], // CLI console output
@@ -64,7 +68,10 @@ if (process.env.GITHUB_ACTIONS === 'true') {
 
 const testDir = defineBddConfig({
   features: 'tests/features/**/*.feature',
-  steps: 'tests/features/step-definitions/**/*.ts'
+  steps: [
+    'tests/features/step-definitions/**/*.ts',
+    'tests/fixtures/**/*.fixture.ts'
+  ]
 })
 
 export default defineConfig({
@@ -74,7 +81,7 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -134,7 +141,7 @@ export default defineConfig({
           command: 'bin/platform.sh frontend up',
           gracefulShutdown: { signal: 'SIGTERM', timeout: serverTimeout },
           ignoreHTTPSErrors: true,
-          url: 'http://localhost:3000/health',
+          url: 'https://localhost:3000/health',
           reuseExistingServer: !process.env.CI,
           timeout: serverTimeout
         }

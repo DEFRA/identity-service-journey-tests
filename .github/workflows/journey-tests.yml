@@ -113,6 +113,16 @@ jobs:
         run: |
           cp identity-service-journey-tests/docker/config/identity-service-helper.env identity-service-helper/compose/identity-service-helper.env
 
+      - name: Generate TLS certificates for identity-service-handler
+        shell: bash
+        run: |
+          openssl req -x509 -newkey rsa:2048 \
+          -keyout identity-service-handler/certs/localhost-key.pem \
+          -out identity-service-handler/certs/localhost.pem \
+          -days 1 -nodes \
+          -subj "/CN=identity-service-handler" \
+          -addext "subjectAltName=DNS:identity-service-handler,DNS:localhost"
+
       # Create identity-service network early (other projects reference as external)
       - name: Ensure identity-services network exists
         shell: bash
@@ -139,6 +149,7 @@ jobs:
           OIDC_SIGNING_CERT: ${{ secrets.OIDC_SIGNING_CERT }}
           OIDC_SIGNING_KEY: ${{ secrets.OIDC_SIGNING_KEY }}
           SESSION_COOKIE_PASSWORD: ${{ secrets.SESSION_COOKIE_PASSWORD }}
+          TLS_ENABLED: true
         run: |
           chmod +x platform.sh
           ./platform.sh backend up && ./platform.sh frontend up
@@ -154,16 +165,23 @@ jobs:
       - name: Debug Backend logs
         shell: bash
         run: docker logs identity-service-helper || true
-      - name: Debug Backend health endpoint debug
+      - name: Debug Backend health endpoint
         shell: bash
         run: docker compose -p identity-services exec -T identity-service-helper curl -v http://identity-service-helper:8080/health
+
+      - name: Debug Test-Site logs
+        shell: bash
+        run: docker logs identity-services-test-site-1 || true
+      - name: Debug Test-Site health endpoint
+        shell: bash
+        run: docker compose -p identity-services exec -T test-site curl -v -k https://test-site:3005/b2c/.well-known/openid-configuration || true
 
       - name: Debug Frontend logs
         shell: bash
         run: docker logs identity-services-identity-service-handler-1 || true
-      - name: Debug Frontend health endpoint debug
+      - name: Debug Frontend health endpoint
         shell: bash
-        run: docker compose -p identity-services exec -T identity-service-helper curl -v -k http://identity-service-handler:3000/health
+        run: docker compose -p identity-services exec -T identity-service-helper curl -v -k https://identity-service-handler:3000/health
 
       - name: Ensure report directories exist
         shell: bash
@@ -177,6 +195,11 @@ jobs:
         env:
           TEST_INPUT: ${{ inputs.test }}
           TAG_INPUT: ${{ inputs.tag }}
+          DELEGATING_USER_WITH_MULTIPLE_CPH: ${{secrets.DELEGATING_USER_WITH_MULTIPLE_CPH}}
+          DELEGATING_USER_WITH_SINGLE_CPH: ${{secrets.DELEGATING_USER_WITH_SINGLE_CPH}}
+          DELEGATING_USER_WITH_NO_CPH: ${{secrets.DELEGATING_USER_WITH_NO_CPH}}
+          X_API_KEY: ${{secrets.X_API_KEY}}
+          X_API_OPERATOR_ID: ${{secrets.X_API_OPERATOR_ID}}
         run: |
           FILTER=""
 

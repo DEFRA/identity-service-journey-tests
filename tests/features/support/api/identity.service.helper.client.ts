@@ -9,4 +9,12 @@ export class IdentityServiceHelperClient extends BaseClient {
   ): Promise<T> {
     return await super.get<T>(url, statusCode, options)
   }
+
+  async post<T>(
+    url: string,
+    statusCode: StatusCodes,
+    options?: object
+  ): Promise<T> {
+    return await super.post<T>(url, statusCode, options)
+  }
 }
