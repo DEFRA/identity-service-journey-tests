@@ -1,3 +1,4 @@
+@ui @frontend
 Feature: Identity Service Handler
 
     Scenario: Home Page

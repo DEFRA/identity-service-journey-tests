@@ -1,4 +1,4 @@
-@userRoles
+@api @backend @userRoles
 Feature: Identity Service Helper - User Roles
 
   Background: Ensure the identity service helper is running
