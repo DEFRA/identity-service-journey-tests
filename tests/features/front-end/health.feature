@@ -1,3 +1,4 @@
+@api @frontend
 Feature: Identity Service Handler - Health Checks
 
   Background: Ensure the identity service handler is running

@@ -1,4 +1,4 @@
-@delegations @delegationsUi
+@ui @frontend @delegations @delegationsUi
 Feature: Identity Service Handler - Delegations
 
   Scenario Outline: User with <cphs_held> CPH's can invite a delegate to manage their CPH's

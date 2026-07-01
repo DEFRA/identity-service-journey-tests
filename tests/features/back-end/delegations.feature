@@ -1,4 +1,4 @@
-@delegations @delegationsApi
+@api @backend @delegations @delegationsApi
 Feature: Identity Service Helper - Delegations
 
   Background: Create a new CPH delegation
