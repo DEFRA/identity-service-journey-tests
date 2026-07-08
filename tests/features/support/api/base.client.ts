@@ -12,7 +12,10 @@ export abstract class BaseClient {
 
   // eslint-disable-next-line
   private prepareRemoteRequest(url: string, options?: any) {
-    if (process.env.apiKey !== 'undefined' && process.env.CDP === undefined) {
+    if (
+      process.env.apiKey !== undefined &&
+      process.env.correlationId !== undefined
+    ) {
       if (options !== undefined && options !== null) {
         if (!options.headers) {
           options.headers = {}
@@ -32,7 +35,8 @@ export abstract class BaseClient {
       const absoluteUrl =
         this.serviceName &&
         this.serviceName === 'identity-service-helper' &&
-        process.env.ENVIRONMENT === 'dev'
+        process.env.ENVIRONMENT === 'dev' &&
+        process.env.CDP === undefined
           ? `/${this.serviceName}` + url
           : url
       const apiKeyOptions = options

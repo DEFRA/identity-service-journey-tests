@@ -34,7 +34,6 @@ echo "Working directory:        $(pwd)"
 echo "------------------------------------------------------------"
 
 TEST_INPUT="${PROFILE}"
-ENVIRONMENT="${ENVIRONMENT}"
 
 FILTER=""
 
@@ -44,10 +43,10 @@ fi
 
 if [ -z "$FILTER" ]; then
   echo "No filters provided. Running all tests for environment: $ENVIRONMENT"
-  CDP=true ENVIRONMENT="$ENVIRONMENT" npx bddgen && npx playwright test --config=playwright.config.ts || touch FAILED
+  npx bddgen && npx playwright test --config=playwright.config.ts || touch FAILED
 else
   echo "Running filtered tests with grep: $FILTER"
-  CDP=true ENVIRONMENT="$ENVIRONMENT" npx bddgen && npx playwright test --config=playwright.config.ts --grep="$FILTER"  || touch FAILED
+  npx bddgen && npx playwright test --config=playwright.config.ts --grep="$FILTER"  || touch FAILED
 fi
 
 # Merge the CTRF JSON reports into a single report file for Github actions summary and publishing

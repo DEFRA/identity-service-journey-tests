@@ -70,12 +70,10 @@ export const test = base.extend<{
   delegatorPage: async ({ browser }, use) => {
     const context = await browser.newContext({})
     await use(await context.newPage())
-    await context.close()
   },
   delegatePage: async ({ browser }, use) => {
     const context = await browser.newContext({})
     await use(await context.newPage())
-    await context.close()
   },
   homePage: async ({ page }, use) => {
     const homePage = new HomePage(page)
